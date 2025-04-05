@@ -7,7 +7,7 @@ app = Flask(__name__)
 CORS(app)  # Permite peticiones desde el frontend
 
 # Inicializar Firebase Admin SDK
-cred = credentials.Certificate("firebase-adminsdk.json")  # archivo JSON descargado de Firebase
+cred = credentials.Certificate("project\\firebase-adminsdk.json")  # archivo JSON descargado de Firebase
 firebase_admin.initialize_app(cred)
 
 @app.route("/protected", methods=["GET"])
@@ -21,7 +21,7 @@ def protected_route():
     try:
         decoded_token = auth.verify_id_token(id_token)
         uid = decoded_token["uid"]
-        return jsonify({"message": f"Token válido. UID: {uid}"})
+        return jsonify({"message": f"Token válidoo. UID: {uid}"})
     except Exception as e:
         return jsonify({"error": f"Token inválido: {str(e)}"}), 401
 

@@ -1,1 +1,21 @@
 venv1/
+firebase-adminsdk.json
+project\firebase-adminsdk.json
+
+# Python
+venv1/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Flask config
+*.env
+firebase-adminsdk.json
+
+# Node.js (para frontend React)
+node_modules/
+dist/
+build/
+.env
+
