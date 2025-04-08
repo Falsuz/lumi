@@ -1,11 +1,14 @@
+// src/pages/AuthForm.jsx
 import { useState } from "react";
-import { auth } from '../firebaseConfig';
+import { useNavigate } from "react-router-dom";
+import { auth } from '../../firebaseConfig';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 
 function AuthForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isRegistering, setIsRegistering] = useState(false); // Estado para alternar entre login y registro
+  const [isRegistering, setIsRegistering] = useState(false);
+  const navigate = useNavigate(); // ⬅️ Aquí usamos el hook
 
   const handleAuth = async (e) => {
     e.preventDefault();
@@ -20,7 +23,6 @@ function AuthForm() {
 
       const token = await userCredential.user.getIdToken();
 
-      // Enviar token al backend
       const response = await fetch("http://localhost:5000/protected", {
         method: "GET",
         headers: {
@@ -30,6 +32,11 @@ function AuthForm() {
 
       const data = await response.json();
       console.log(`${isRegistering ? "Registro" : "Login"} exitoso, respuesta del backend:`, data);
+
+      // 🔁 Si es registro, redirigimos a preferencias
+      if (isRegistering) {
+        navigate("/preferencias");
+      }
     } catch (error) {
       console.error(`Error al ${isRegistering ? "registrar" : "iniciar sesión"}:`, error.message);
     }

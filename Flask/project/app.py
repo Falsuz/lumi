@@ -23,7 +23,7 @@ def protected_route():
         uid = decoded_token["uid"]
         return jsonify({"message": f"Token válidoo. UID: {uid}"})
     except Exception as e:
-        return jsonify({"error": f"Token inválido: {str(e)}"}), 401
+        return jsonify({"error": f"Token inválidoo: {str(e)}"}), 401
 
 if __name__ == "__main__":
     app.run(debug=True)
