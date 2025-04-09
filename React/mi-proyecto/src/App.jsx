@@ -2,7 +2,8 @@ import './App.css'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Welcome from "./pages/Welcome";
 import AuthForm from "./pages/AuthForm";
-import Preferencias from "./pages/Preferences";
+import Preferences from "./pages/Preferences";
+import Chatbot from "./pages/Chatbot"; 
 
 function App() {
   return (
@@ -10,7 +11,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Welcome />} />
         <Route path="/auth" element={<AuthForm />} />
-        <Route path="/preferencias" element={<Preferencias />} />
+        <Route path="/chat" element={<Chatbot />} />
+        <Route path="/preferencias" element={<Preferences />} />
       </Routes>
     </Router>
   );
