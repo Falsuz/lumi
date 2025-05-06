@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Inicializar Firebase Admin SDK
-cred = credentials.Certificate("project\\firebase-adminsdk.json")
+cred = credentials.Certificate("Flask\\project\\firebase-adminsdk.json")
 firebase_admin.initialize_app(cred) 
 db = firestore.client()
 
@@ -167,11 +167,11 @@ def chat():
 
 # Función para transformar las preferencias del usuario en un mensaje de contexto
 def generar_contexto_desde_preferencias(preferencias):
-    # Este método lo puedes adaptar a tu estructura real de preferencias
     nombre = preferencias.get("nombre", "usuario")
     tono = preferencias.get("tono", "amigable")
     intereses = preferencias.get("intereses", [])
     objetivo = preferencias.get("objetivo", "ayuda general")
+    pronombres = preferencias.get("pronombre", "femenino")
 
     intereses_str = ", ".join(intereses) if isinstance(intereses, list) else intereses
 
@@ -182,13 +182,8 @@ def generar_contexto_desde_preferencias(preferencias):
         f"Su objetivo es {objetivo}. "
         "Responde de forma personalizada y empática."
         "Das apoyo emocional al usuario"
+        f"Pronombres del usuario {pronombres}"
     )
-    """
-    EJEMPLO FIREBASE: {
-  "tono": "profesional",
-  "intereses": ["salud mental", "motivación", "tecnología"],
-  "objetivo": "recibir apoyo psicológico diario"
-    }
-    """
+
 if __name__ == "__main__":
     app.run(debug=True)
