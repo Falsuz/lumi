@@ -1,7 +1,7 @@
 // src/pages/AuthForm.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth } from '../../firebaseConfig';
+import { auth } from '../firebaseConfig';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 
 function AuthForm() {
@@ -35,7 +35,7 @@ function AuthForm() {
 
       // 🔁 Si es registro, redirigimos a preferencias
       if (isRegistering) {
-        navigate("/preferencias");
+        navigate("/chat");
       }
     } catch (error) {
       console.error(`Error al ${isRegistering ? "registrar" : "iniciar sesión"}:`, error.message);

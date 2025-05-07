@@ -2,22 +2,26 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
-import openai
+from openai import OpenAI
 import os
 from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app)
 
+# Obtener la ruta absoluta del archivo firebase-adminsdk.json
+base_dir = os.path.dirname(os.path.abspath(__file__))
+firebase_cred_path = os.path.join(base_dir, "firebase-adminsdk.json")
+
 # Inicializar Firebase Admin SDK
-cred = credentials.Certificate("Flask\\project\\firebase-adminsdk.json")
-firebase_admin.initialize_app(cred) 
+cred = credentials.Certificate(firebase_cred_path)
+firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-# OpenAi
-
-load_dotenv()  # Carga variables desde el archivo .env
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Cargar variables de entorno
+load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=openai_api_key)
 
 @app.route("/protected", methods=["GET"])
 def protected_route():
@@ -30,7 +34,7 @@ def protected_route():
     try:
         decoded_token = auth.verify_id_token(id_token)
         uid = decoded_token["uid"]
-        return jsonify({"message": f"Token válido. UID: {uid}"})
+        return jsonify({"message": f"Token válido{id_token}. UID: {uid}"})
     except Exception as e:
         return jsonify({"error": f"Token inválido: {str(e)}"}), 401
 
@@ -51,9 +55,6 @@ def guardar_preferencias():
         return jsonify({"error": "No autorizado o error al guardar preferencias"}), 401
 
 
-# ========== CRUD de USUARIOS ==========
-
-# Crear usuario
 @app.route('/api/usuarios', methods=['POST'])
 def crear_usuario():
     token = request.headers.get('Authorization').split(' ')[1]
@@ -70,7 +71,6 @@ def crear_usuario():
         return jsonify({"error": "Error al crear usuario"}), 401
 
 
-# Obtener información del usuario
 @app.route('/api/usuarios', methods=['GET'])
 def obtener_usuario():
     token = request.headers.get('Authorization').split(' ')[1]
@@ -89,7 +89,6 @@ def obtener_usuario():
         return jsonify({"error": "Error al obtener usuario"}), 401
 
 
-# Actualizar información del usuario
 @app.route('/api/usuarios', methods=['PUT'])
 def actualizar_usuario():
     token = request.headers.get('Authorization').split(' ')[1]
@@ -105,7 +104,6 @@ def actualizar_usuario():
         return jsonify({"error": "Error al actualizar usuario"}), 401
 
 
-# Eliminar usuario
 @app.route('/api/usuarios', methods=['DELETE'])
 def eliminar_usuario():
     token = request.headers.get('Authorization').split(' ')[1]
@@ -119,9 +117,9 @@ def eliminar_usuario():
         print(f"Error: {e}")
         return jsonify({"error": "Error al eliminar usuario"}), 401
 
+
 @app.route("/api/chat", methods=["POST"])
 def chat():
-    # Paso 1: Verificar token
     auth_header = request.headers.get('Authorization', '')
     if not auth_header:
         return jsonify({"error": "Token no proporcionado"}), 401
@@ -132,13 +130,11 @@ def chat():
     except Exception as e:
         return jsonify({"error": "Token inválido o no autorizado", "detail": str(e)}), 401
 
-    # Paso 2: Obtener mensaje del usuario
     data = request.json
     user_input = data.get("mensaje")
     if not user_input:
         return jsonify({"error": "No se envió ningún mensaje"}), 400
 
-    # Paso 3: Obtener preferencias del usuario desde Firestore
     try:
         doc_ref = db.collection('preferencias').document(uid)
         doc = doc_ref.get()
@@ -146,13 +142,12 @@ def chat():
             preferencias = doc.to_dict()
             contexto = generar_contexto_desde_preferencias(preferencias)
         else:
-            contexto = "Eres un asistente amigable y útil."  # fallback por si no hay preferencias
+            contexto = "Eres un asistente amigable y útil."
     except Exception as e:
         return jsonify({"error": "Error al obtener preferencias", "detail": str(e)}), 500
 
-    # Paso 4: Llamar a OpenAI
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": contexto},
@@ -165,7 +160,6 @@ def chat():
         return jsonify({"error": "Error al generar respuesta", "detail": str(e)}), 500
 
 
-# Función para transformar las preferencias del usuario en un mensaje de contexto
 def generar_contexto_desde_preferencias(preferencias):
     nombre = preferencias.get("nombre", "usuario")
     tono = preferencias.get("tono", "amigable")
@@ -176,14 +170,14 @@ def generar_contexto_desde_preferencias(preferencias):
     intereses_str = ", ".join(intereses) if isinstance(intereses, list) else intereses
 
     return (
-        f"El nombre de usuario es: {nombre}"
+        f"El nombre de usuario es: {nombre}. "
         f"Eres un asistente con tono {tono}. "
         f"Este usuario está interesado en {intereses_str}. "
         f"Su objetivo es {objetivo}. "
-        "Responde de forma personalizada y empática."
-        "Das apoyo emocional al usuario"
-        f"Pronombres del usuario {pronombres}"
+        f"Pronombres del usuario: {pronombres}. "
+        "Responde de forma personalizada, empática y brinda apoyo emocional."
     )
+
 
 if __name__ == "__main__":
     app.run(debug=True)
