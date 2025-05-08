@@ -23,7 +23,7 @@ function AuthForm() {
 
       const token = await userCredential.user.getIdToken();
 
-      const response = await fetch("http://localhost:5000/protected", {
+      const response = await fetch("https://lumiapi-luzj.onrender.com/protected", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

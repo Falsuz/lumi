@@ -29,7 +29,7 @@ function Preferences() {
       const idToken = await user.getIdToken(); // Obtenemos el token del usuario
 
       try {
-        const response = await fetch("http://localhost:5000/api/preferencias", {
+        const response = await fetch("https://lumiapi-luzj.onrender.com/api/preferencias", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
